@@ -1,3 +1,4 @@
+### Create auth methods for team1 and team2
 resource "vault_auth_backend" "userpass_team1" {
   type = "userpass"
   path = "team1"
@@ -13,6 +14,7 @@ resource "vault_auth_backend" "userpass_team2" {
 #   path = "team3"
 # }
 
+### Define policies for team1 and team2
 resource "vault_policy" "team1_policy" {
   name = "team1-policy"
 
@@ -37,45 +39,43 @@ path "kvv2-team2/*" {
 EOT
 }
 
+### Mount KV-v2 secrets engines for team1 and team2
 resource "vault_mount" "team1_kvv2_mount" {
   path        = "kvv2-team1"
   type        = "kv-v2"
-  description = "This is an kv-v2 secrets engine mounted at the path kvv2-team1"
+  description = "This is a kv-v2 secrets engine mounted at the path kvv2-team1"
 }
 
 resource "vault_mount" "team2_kvv2_mount" {
   path        = "kvv2-team2"
   type        = "kv-v2"
-  description = "This is an kv-v2 secrets engine mounted at the path kvv2-team2"
+  description = "This is a kv-v2 secrets engine mounted at the path kvv2-team2"
 }
 
+### Create secrets for team1
 resource "vault_kv_secret_v2" "kvv2_team1_master_secret" {
   mount = vault_mount.team1_kvv2_mount.path
   name  = "aws-master-account"
-  data_json = jsonencode(
-    {
-      username = "master-admin"
-      password = "master-Passw0rd"
-      region   = "singapore"
-    }
-  )
+
+  data_json = jsonencode({
+    username = "master-admin"
+    password = "master-Passw0rd"
+    region   = "singapore"
+  })
 }
 
 resource "vault_kv_secret_v2" "kvv2_team1_dev_secret" {
   mount = vault_mount.team1_kvv2_mount.path
   name  = "aws-dev-account"
-  data_json = jsonencode(
-    {
-      username = "dev-admin"
-      password = "dev-Passw0rd"
-      region   = "japan"
-    }
-  )
+
+  data_json = jsonencode({
+    username = "dev-admin"
+    password = "dev-Passw0rd"
+    region   = "japan"
+  })
 }
 
-
-
-#add users under team1/
+### Add users under team1
 resource "vault_generic_endpoint" "team1-users" {
   depends_on           = [vault_auth_backend.userpass_team1]
   path                 = "auth/team1/users/dev-team1"
@@ -89,7 +89,7 @@ resource "vault_generic_endpoint" "team1-users" {
 EOT
 }
 
-#add users under team2/
+### Add users under team2
 resource "vault_generic_endpoint" "team2-users" {
   depends_on           = [vault_auth_backend.userpass_team2]
   path                 = "auth/team2/users/dev-team2"
@@ -102,42 +102,3 @@ resource "vault_generic_endpoint" "team2-users" {
 }
 EOT
 }
-
-
-# ##############################################
-# create user under team1
-# ######################################
-
-# resource "vault_generic_endpoint" "team1-users" {
-#   path = "auth/team1/users/dev-team1"
-
-#   data_json = <<EOT
-# {
-#   "password": "team1"
-# }
-# EOT
-# }
-
-# resource "vault_generic_endpoint" "team2-users" {
-#   path = "auth/team2/users/dev-team2"
-
-#   data_json = <<EOT
-# {
-#   "password": "team2"
-# }
-# EOT
-# }
-
-# ##############################################
-# Binding policies
-# ##########################################
-
-# resource "vault_identity_entity_policies" "bind-dev-team1" {
-#   policies = ["team1-policy"]
-#   entity_id = "f090ccc7-d8d7-2663-4995-75dd55c16163"
-# }
-
-# resource "vault_identity_entity_policies" "bind-dev-team2" {
-#   policies = ["team2-policy"]
-#   entity_id = "6168f223-4955-33dd-447d-c3e381de446c"
-# }
