@@ -74,32 +74,70 @@ resource "vault_kv_secret_v2" "kvv2_team1_dev_secret" {
 }
 
 
+
+#add users under team1/
 resource "vault_generic_endpoint" "team1-users" {
-  path = "auth/team1/users/dev-team1"
+  depends_on           = [vault_auth_backend.userpass_team1]
+  path                 = "auth/team1/users/dev-team1"
+  ignore_absent_fields = true
 
   data_json = <<EOT
 {
+  "policies": ["team1-policy"],
   "password": "team1"
 }
 EOT
 }
 
+#add users under team2/
 resource "vault_generic_endpoint" "team2-users" {
-  path = "auth/team2/users/dev-team2"
+  depends_on           = [vault_auth_backend.userpass_team2]
+  path                 = "auth/team2/users/dev-team2"
+  ignore_absent_fields = true
 
   data_json = <<EOT
 {
+  "policies": ["team2-policy"],
   "password": "team2"
 }
 EOT
 }
 
-resource "vault_identity_entity_policies" "bind-dev-team1" {
-  policies = ["team1-policy"]
-  entity_id = "f090ccc7-d8d7-2663-4995-75dd55c16163"
-}
 
-resource "vault_identity_entity_policies" "bind-dev-team2" {
-  policies = ["team2-policy"]
-  entity_id = "6168f223-4955-33dd-447d-c3e381de446c"
-}
+# ##############################################
+# create user under team1
+# ######################################
+
+# resource "vault_generic_endpoint" "team1-users" {
+#   path = "auth/team1/users/dev-team1"
+
+#   data_json = <<EOT
+# {
+#   "password": "team1"
+# }
+# EOT
+# }
+
+# resource "vault_generic_endpoint" "team2-users" {
+#   path = "auth/team2/users/dev-team2"
+
+#   data_json = <<EOT
+# {
+#   "password": "team2"
+# }
+# EOT
+# }
+
+# ##############################################
+# Binding policies
+# ##########################################
+
+# resource "vault_identity_entity_policies" "bind-dev-team1" {
+#   policies = ["team1-policy"]
+#   entity_id = "f090ccc7-d8d7-2663-4995-75dd55c16163"
+# }
+
+# resource "vault_identity_entity_policies" "bind-dev-team2" {
+#   policies = ["team2-policy"]
+#   entity_id = "6168f223-4955-33dd-447d-c3e381de446c"
+# }
