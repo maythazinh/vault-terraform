@@ -9,6 +9,6 @@ terraform {
 
 provider "vault" {
   # Configuration options
-  address = "http://127.0.0.1:8202"
+  address = "http://127.0.0.1:8200"
   token   = var.vault1-token
 }
